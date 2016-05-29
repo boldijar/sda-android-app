@@ -64,6 +64,11 @@ public class SdaAdapter extends RecyclerView.Adapter<SdaAdapter.SdaHolder> {
         return mNodes.size();
     }
 
+    public void add(String name, String url) {
+        mDictionary.add(name, url);
+        updateNodes();
+    }
+
     public class SdaHolder extends RecyclerView.ViewHolder {
         public ImageView image;
         public TextView text;
