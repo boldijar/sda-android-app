@@ -16,7 +16,11 @@ public class Dictionary {
     private Node[] mNodes;
 
     private int dispersionPosition(String key) {
-        return key.hashCode() % HASH_SIZE;
+        int hash = 0;
+        for (int i = 0; i < key.length(); i++) {
+            hash += 25 * key.charAt(i);
+        }
+        return Math.abs(hash % HASH_SIZE);
     }
 
     /**
@@ -51,7 +55,26 @@ public class Dictionary {
      * deletes the value with the choosen key from the dictionary
      */
     public void delete(String key) {
-
+        int position = dispersionPosition(key);
+        Node currentNode = mNodes[position];
+        if (currentNode == null) {
+            /* no node with this key */
+            return;
+        }
+        /* check if first node is the one that we want to delete */
+        if (key.equals(currentNode.key)) {
+            mNodes[position] = currentNode.next;
+            return;
+        }
+        do {
+            Node lastNode = currentNode;
+            currentNode = currentNode.next;
+            if (key.equals(currentNode.key)) {
+                // found element, change reference from last, to current next node
+                lastNode.next = currentNode.next;
+                return;
+            }
+        } while (currentNode != null);
     }
 
     /**
@@ -65,7 +88,17 @@ public class Dictionary {
      returns the size of the dictionary
      */
     public int size() {
-        return 0;
+        int count = 0;
+        for (Node mNode : mNodes) {
+            Node currentNode = mNode;
+            do {
+                if (currentNode != null) {
+                    count++;
+                    currentNode = currentNode.next;
+                }
+            } while (currentNode != null);
+        }
+        return count;
     }
 
     /*
@@ -79,12 +112,19 @@ public class Dictionary {
      creates the iterator for this dictionary
     */
     public void createIterator() {
-        mIterator = new Iterator(this);
+        mIterator = new Iterator(this, mNodes);
     }
 
     /*
-    delets the iterator
+     returns the iterator of this dictionary
      */
+    public Iterator getIterator() {
+        return mIterator;
+    }
+
+    /*
+        delets the iterator
+         */
     public void disposeIterator() {
         mIterator = null;
     }
@@ -92,13 +132,47 @@ public class Dictionary {
     public static void main(String[] args) {
         Dictionary dictionary = new Dictionary();
         dictionary.create(Order.ASCENDING);
-        dictionary.add("paul", "www.paul.com");
-        dictionary.add("raul","www.asd.com");
-        dictionary.add("sau","www.12.com");
-        dictionary.add("a","www.smek.com");
-        dictionary.add("s","www.sdsd.com");
-        dictionary.add("a","www.2902.com");
-        dictionary.add("sau","www.1aa69.com");
+        dictionary.add("a", "www.1234.com");
+        dictionary.add("b", "www.paul.com");
+        dictionary.add("c", "www.asd.com");
+        dictionary.add("d", "www.12.com");
+        dictionary.add("e", "www.smek.com");
+        dictionary.add("f", "www.sdsd.com");
+        dictionary.add("g", "www.2902.com");
+        dictionary.add("h", "www.barosan.com");
+        dictionary.add("ab", "www.barosan.com");
+        dictionary.add("cd", "www.barosan.com");
+        dictionary.add("ef", "www.barosan.com");
+        dictionary.add("abc", "www.barosan.com");
+        dictionary.add("def", "www.barosan.com");
+        dictionary.add("smecherie", "www.barosan.com");
+        dictionary.add("zgi", "www.barosan.com");
+        dictionary.add("kmw", "www.barosan.com");
+        dictionary.add("wek", "www.barosan.com");
 
+        test(dictionary.size(), 17);
+
+        dictionary.delete("def");
+        test(dictionary.size(), 16);
+
+        dictionary.delete("h");
+        dictionary.delete("abc");
+
+        test(dictionary.size(), 14);
+
+        dictionary.createIterator();
+        Iterator iterator = dictionary.getIterator();
+        iterator.initialize();
+
+        while (iterator.valid()) {
+            System.out.println(iterator.current());
+            iterator.next();
+        }
+    }
+
+    private static void test(int a, int b) {
+        if (a != b) {
+            throw new RuntimeException(String.format("Expected %d, actual %d", a, b));
+        }
     }
 }
