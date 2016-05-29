@@ -34,6 +34,12 @@ public class Dictionary {
     /**
      * ads a new key-value pair
      */
+
+    private boolean compare(String a1, String a2) {
+        int orderSort = getOrder() == Order.DESCENDING ? -1 : 1;
+        return (a1.compareTo(a2) * orderSort) < 0;
+    }
+
     public void add(String key, String url) {
         int position = dispersionPosition(key);
         Node currentNode = mNodes[position];
@@ -44,11 +50,27 @@ public class Dictionary {
             mNodes[position] = currentNode;
             return;
         }
+        if (compare(key, currentNode.key)) {
+            // we want to add this node first
+            Node node = new Node(key, url);
+            node.next = mNodes[position];
+            mNodes[position] = node;
+            return;
+        }
         while (currentNode.next != null) {
+            if (compare(key, currentNode.next.key)) {
+                // we should put here new node
+                Node node = new Node(key, url);
+                node.next = currentNode.next;
+                currentNode.next = node;
+                return;
+            }
             /* go deeper until we found our last node */
             currentNode = currentNode.next;
         }
+        // probably we want to add last this node
         currentNode.next = new Node(key, url);
+
     }
 
     /**
@@ -101,9 +123,13 @@ public class Dictionary {
         return count;
     }
 
+    public Order getOrder() {
+        return mOrder;
+    }
+
     /*
-     returns true if list is void, false otherwise
-     */
+         returns true if list is void, false otherwise
+         */
     public boolean isVoid() {
         return size() == 0;
     }
@@ -131,7 +157,7 @@ public class Dictionary {
 
     public static void main(String[] args) {
         Dictionary dictionary = new Dictionary();
-        dictionary.create(Order.ASCENDING);
+        dictionary.create(Order.DESCENDING);
         dictionary.add("a", "www.1234.com");
         dictionary.add("b", "www.paul.com");
         dictionary.add("c", "www.asd.com");
